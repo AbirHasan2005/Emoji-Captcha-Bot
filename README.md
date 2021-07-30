@@ -21,6 +21,8 @@ python3 main.py
 
 #### Inspired from [@PyrogramBot](https://t.me/PyrogramBot) Captcha
 
+#### Thanks to [Thomas Shelby](https://github.com/th0m45s5helby) & [Jigar Varma](https://github.com/Jigarvarma2005) for Helping with Logics.
+
 ### Follow on:
 <p align="left">
 <a href="https://github.com/AbirHasan2005"><img src="https://img.shields.io/badge/GitHub-Follow%20on%20GitHub-inactive.svg?logo=github"></a>
