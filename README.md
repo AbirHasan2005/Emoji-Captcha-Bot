@@ -2,7 +2,7 @@
 A Telegram Bot which will ask new Group Members to verify them by solving an emoji captcha.
 
 ## About API:
-Using [api.abirhasan.wtf/captcha](https://api.abirhasan.wtf/captcha) for generating captcha. To request to API you will need Access Token `CAPTCHA_API_TOKEN`. For Access Token ask at [@DevsZone](https://t.me/DevsZone).
+Using [api.abirhasan.wtf/captcha](https://api.abirhasan.wtf/captcha) for generating captcha. To request to API you will need Access Token `CAPTCHA_API_TOKEN`. For Access Token ask at [@DevsZone](https://t.me/DevsZone) or DM [@AkibHridoy](https://t.me/AkibHridoy).
 
 ### Demo Group:
 <a href="https://t.me/DevsZone"><img src="https://img.shields.io/badge/Telegram-Group-blue.svg?logo=telegram"></a>
