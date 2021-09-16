@@ -5,7 +5,7 @@ A Telegram Bot which will ask new Group Members to verify them by solving an emo
 Using [api.abirhasan.wtf/captcha](https://api.abirhasan.wtf/captcha) for generating captcha. To request to API you will need Access Token `CAPTCHA_API_TOKEN`. For Access Token ask at [@JoinOT](https://t.me/JoinOT) or DM [@AkibHridoy](https://t.me/AkibHridoy).
 
 ### Demo Group:
-<a href="https://t.me/DevsZone"><img src="https://img.shields.io/badge/Telegram-Group-blue.svg?logo=telegram"></a>
+<a href="https://t.me/JoinOT"><img src="https://img.shields.io/badge/Telegram-Group-blue.svg?logo=telegram"></a>
 
 ### Heroku Deploy:
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/AbirHasan2005/Emoji-Captcha-Bot)
