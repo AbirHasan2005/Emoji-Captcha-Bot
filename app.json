@@ -9,7 +9,7 @@
     ],
     "repository": "https://github.com/AbirHasan2005/Emoji-Captcha-Bot",
     "website": "https://telegram.dog/AbirHasan2005",
-    "success_url": "https://t.me/DevsZone",
+    "success_url": "https://t.me/JoinOT",
     "env": {
         "API_ID": {
             "description": "Get this value from my.telegram.org or @TeleORG_Bot"
@@ -35,7 +35,7 @@
             "description": "Your Telegram Group ID where the bot will ask for verify by Captcha."
         },
         "CAPTCHA_API_TOKEN": {
-            "description": "Needs Captcha API Token to get Captcha. Get this from https://t.me/DevsZone !!"
+            "description": "Needs Captcha API Token to get Captcha. Get this from https://t.me/JoinOT !!"
         }
     },
     "buildpacks": [
