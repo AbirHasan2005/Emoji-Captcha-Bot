@@ -1,12 +1,15 @@
 # (c) @AbirHasan2005
 
+import os
 import random
 import aiohttp
 import asyncio
 from configs import Config
 from pyrogram import Client, filters
 from pyrogram.errors import UserNotParticipant
-from helpers.markup_maker import MakeCaptchaMarkup
+from helpers.captcha import make_captcha
+from helpers.generate_id import generate_rnd_id
+from helpers.markup_maker import make_captcha_markup
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery, ChatPermissions
 
 CaptchaBot = Client(
@@ -87,72 +90,62 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             await cb.answer("This Message is Not For You!", show_alert=True)
             return
         await cb.message.edit("Generating Captcha ...")
-        print("Fetching Captcha JSON Data ...")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.abirhasan.wtf/captcha?token={Config.CAPTCHA_API_TOKEN}") as res:
-                if res.status != 200:
-                    try:
-                        UserOnChat = await bot.get_chat_member(user_id=cb.from_user.id, chat_id=cb.message.chat.id)
-                        if UserOnChat.restricted_by.id == (await bot.get_me()).id:
-                            await bot.unban_chat_member(chat_id=cb.message.chat.id, user_id=cb.from_user.id)
-                    except:
-                        pass
-                    await cb.message.edit("Unable to get Captcha!")
-                    return
-                data = await res.json()
-                print("Done!")
-                markup = [[], [], []]
-                __emojis = data["CaptchaAnswer"].split(": ", 1)[-1].split()
-                print(__emojis)
-                _emojis = ['🐻', '🐔', '☁️', '🔮', '🌀', '🌚', '💎', '🐶', '🍩', '🌏', '🐸', '🌕', '🍏', '🐵', '🌙',
-                           '🐧', '🍎', '😀', '🐍', '❄️', '🐚', '🐢', '🌝', '🍺', '🍔', '🍒', '🍫', '🍡', '🌑', '🍟',
-                           '☕️', '🍑', '🍷', '🍧', '🍕', '🍵', '🐋', '🐱', '💄', '👠', '💰', '💸', '🎹', '📦', '📍',
-                           '🐊', '🦕', '🐬', '💋', '🦎', '🦈', '🦷', '🦖', '🐠', '🐟','💀', '🎃', '👮', '⛑', '🪢', '🧶',
-                           '🧵', '🪡', '🧥', '🥼', '🥻', '🎩', '👑', '🎒', '🙊', '🐗', '🦋', '🦐', '🐀', '🐿', '🦔', '🦦', 
-                           '🦫', '🦡', '🦨', '🐇']
-                print("Cleaning Answer Emojis from Emojis List ...")
-                for a in range(len(__emojis)):
-                    if __emojis[a] in _emojis:
-                        _emojis.remove(__emojis[a])
-                show = __emojis
-                print("Appending New Emoji List ...")
-                for b in range(9):
-                    show.append(_emojis[b])
-                print("Randomizing ...")
-                random.shuffle(show)
-                count = 0
-                print("Appending to ROW - 1")
-                for _ in range(5):
-                    markup[0].append(InlineKeyboardButton(f"{show[count]}",
-                                                          callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
-                    count += 1
-                print("Appending to ROW - 2")
-                for _ in range(5):
-                    markup[1].append(InlineKeyboardButton(f"{show[count]}",
-                                                          callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
-                    count += 1
-                print("Appending to ROW - 3")
-                for _ in range(5):
-                    markup[2].append(InlineKeyboardButton(f"{show[count]}",
-                                                          callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
-                    count += 1
-                print("Setting Up in Database ...")
-                CaptchaDB[cb.from_user.id] = {
-                    "emojis": data["CaptchaAnswer"].split(": ", 1)[-1].split(),
-                    "mistakes": 0,
-                    "group_id": cb.message.chat.id,
-                    "message_id": None
-                }
-                print("Sending Captcha ...")
-                __message = await bot.send_photo(
-                    chat_id=cb.message.chat.id,
-                    photo=data["DownloadURL"],
-                    caption=f"{cb.from_user.mention}, select all the emojis you can see in the picture. "
-                            f"You are allowed only (3) mistakes.",
-                    reply_markup=InlineKeyboardMarkup(markup)
-                )
-                CaptchaDB[cb.from_user.id]["message_id"] = __message.message_id
-                await cb.message.delete(revoke=True)
+        print("Fetching Captcha ...")
+        data, emoji_path_ = make_captcha(generate_rnd_id())
+        print("Done!")
+        markup = [[], [], []]
+        __emojis = data.split(": ", 1)[-1].split()
+        print(__emojis)
+        _emojis = ['🐻', '🐔', '☁️', '🔮', '🌀', '🌚', '💎', '🐶', '🍩', '🌏', '🐸', '🌕', '🍏', '🐵', '🌙',
+                   '🐧', '🍎', '😀', '🐍', '❄️', '🐚', '🐢', '🌝', '🍺', '🍔', '🍒', '🍫', '🍡', '🌑', '🍟',
+                   '☕️', '🍑', '🍷', '🍧', '🍕', '🍵', '🐋', '🐱', '💄', '👠', '💰', '💸', '🎹', '📦', '📍',
+                   '🐊', '🦕', '🐬', '💋', '🦎', '🦈', '🦷', '🦖', '🐠', '🐟','💀', '🎃', '👮', '⛑', '🪢', '🧶',
+                   '🧵', '🪡', '🧥', '🥼', '🥻', '🎩', '👑', '🎒', '🙊', '🐗', '🦋', '🦐', '🐀', '🐿', '🦔', '🦦', 
+                   '🦫', '🦡', '🦨', '🐇']
+        print("Cleaning Answer Emojis from Emojis List ...")
+        for a in range(len(__emojis)):
+            if __emojis[a] in _emojis:
+                _emojis.remove(__emojis[a])
+        show = __emojis
+        print("Appending New Emoji List ...")
+        for b in range(9):
+            show.append(_emojis[b])
+        print("Randomizing ...")
+        random.shuffle(show)
+        count = 0
+        print("Appending to ROW - 1")
+        for _ in range(5):
+            markup[0].append(InlineKeyboardButton(f"{show[count]}",
+                                                  callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
+            count += 1
+        print("Appending to ROW - 2")
+        for _ in range(5):
+            markup[1].append(InlineKeyboardButton(f"{show[count]}",
+                                                  callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
+            count += 1
+        print("Appending to ROW - 3")
+        for _ in range(5):
+            markup[2].append(InlineKeyboardButton(f"{show[count]}",
+                                                  callback_data=f"verify_{str(cb.from_user.id)}_{show[count]}"))
+            count += 1
+        print("Setting Up in Database ...")
+        CaptchaDB[cb.from_user.id] = {
+            "emojis": data.split(": ", 1)[-1].split(),
+            "mistakes": 0,
+            "group_id": cb.message.chat.id,
+            "message_id": None
+        }
+        print("Sending Captcha ...")
+        __message = await bot.send_photo(
+            chat_id=cb.message.chat.id,
+            photo=emoji_path_,
+            caption=f"{cb.from_user.mention}, select all the emojis you can see in the picture. "
+                    f"You are allowed only (3) mistakes.",
+            reply_markup=InlineKeyboardMarkup(markup)
+        )
+        os.remove(emoji_path_)
+        CaptchaDB[cb.from_user.id]["message_id"] = __message.message_id
+        await cb.message.delete(revoke=True)
 
     elif cb.data.startswith("verify_"):
         __emoji = cb.data.rsplit("_", 1)[-1]
@@ -167,13 +160,16 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             await cb.answer("You pressed wrong emoji!", show_alert=True)
             n = 3 - CaptchaDB[cb.from_user.id]['mistakes']
             if n == 0:
-                await cb.message.edit_caption(f"{cb.from_user.mention}, you failed to solve the captcha!\n\n"
-                                              f"You can try again after 10 minutes.",
-                                              reply_markup=None)
+                await cb.message.delete(True)
+                await bot.send_message(
+                    chat_id=cb.message.chat.id,
+                    text=f"{cb.from_user.mention}, you failed to solve the captcha!\n\n"
+                         f"You can try again after 10 minutes."
+                )
                 await asyncio.sleep(600)
                 del CaptchaDB[cb.from_user.id]
                 return
-            markup = await MakeCaptchaMarkup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "❌")
+            markup = make_captcha_markup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "❌")
             await cb.message.edit_caption(
                 caption=f"{cb.from_user.mention}, select all the emojis you can see in the picture. "
                         f"You are allowed only ({n}) mistakes.",
@@ -182,7 +178,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             return
         else:
             CaptchaDB.get(cb.from_user.id).get("emojis").remove(__emoji)
-            markup = await MakeCaptchaMarkup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "✅")
+            markup = make_captcha_markup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "✅")
             await cb.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(markup))
             if not CaptchaDB.get(cb.from_user.id).get("emojis"):
                 await cb.answer("You Passed the Captcha!", show_alert=True)

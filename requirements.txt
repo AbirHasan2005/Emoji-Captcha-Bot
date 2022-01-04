@@ -1,3 +1,4 @@
 Pyrogram
 TgCrypto
 aiohttp
+Pillow
