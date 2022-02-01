@@ -102,6 +102,8 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
                    '🐊', '🦕', '🐬', '💋', '🦎', '🦈', '🦷', '🦖', '🐠', '🐟','💀', '🎃', '👮', '⛑', '🪢', '🧶',
                    '🧵', '🪡', '🧥', '🥼', '🥻', '🎩', '👑', '🎒', '🙊', '🐗', '🦋', '🦐', '🐀', '🐿', '🦔', '🦦', 
                    '🦫', '🦡', '🦨', '🐇']
+        random.shuffle(_emojis)
+        _emojis = _emojis[:20]
         print("Cleaning Answer Emojis from Emojis List ...")
         for a in range(len(__emojis)):
             if __emojis[a] in _emojis:
