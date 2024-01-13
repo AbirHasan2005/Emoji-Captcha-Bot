@@ -164,6 +164,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             return
         if cb.from_user.id not in CaptchaDB:
             await cb.answer("Try Again After Re-Join!", show_alert=True)
+            await cb.message.delete()
         if __emoji not in CaptchaDB.get(cb.from_user.id).get("emojis"):
             CaptchaDB[cb.from_user.id]["mistakes"] += 1
             await cb.answer("You pressed wrong emoji!", show_alert=True)
