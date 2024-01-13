@@ -2,6 +2,7 @@
 
 import os
 import random
+import logging
 import aiohttp
 import asyncio
 from configs import Config
@@ -12,8 +13,14 @@ from helpers.generate_id import generate_rnd_id
 from helpers.markup_maker import make_captcha_markup
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery, ChatPermissions
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("log.txt")],
+)
+
 CaptchaBot = Client(
-    session_name=Config.SESSION_NAME,
+    Config.SESSION_NAME,
     api_id=Config.API_ID,
     api_hash=Config.API_HASH,
     bot_token=Config.BOT_TOKEN
@@ -146,7 +153,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(markup)
         )
         os.remove(emoji_path_)
-        CaptchaDB[cb.from_user.id]["message_id"] = __message.message_id
+        CaptchaDB[cb.from_user.id]["message_id"] = __message.id
         await cb.message.delete(revoke=True)
 
     elif cb.data.startswith("verify_"):
@@ -157,6 +164,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             return
         if cb.from_user.id not in CaptchaDB:
             await cb.answer("Try Again After Re-Join!", show_alert=True)
+            await cb.message.delete()
         if __emoji not in CaptchaDB.get(cb.from_user.id).get("emojis"):
             CaptchaDB[cb.from_user.id]["mistakes"] += 1
             await cb.answer("You pressed wrong emoji!", show_alert=True)
@@ -171,7 +179,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
                 await asyncio.sleep(600)
                 del CaptchaDB[cb.from_user.id]
                 return
-            markup = make_captcha_markup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "❌")
+            markup = make_captcha_markup(cb.message.reply_markup.inline_keyboard, __emoji, "❌")
             await cb.message.edit_caption(
                 caption=f"{cb.from_user.mention}, select all the emojis you can see in the picture. "
                         f"You are allowed only ({n}) mistakes.",
@@ -180,7 +188,7 @@ async def buttons_handlers(bot: Client, cb: CallbackQuery):
             return
         else:
             CaptchaDB.get(cb.from_user.id).get("emojis").remove(__emoji)
-            markup = make_captcha_markup(cb.message["reply_markup"]["inline_keyboard"], __emoji, "✅")
+            markup = make_captcha_markup(cb.message.reply_markup.inline_keyboard, __emoji, "✅")
             await cb.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(markup))
             if not CaptchaDB.get(cb.from_user.id).get("emojis"):
                 await cb.answer("You Passed the Captcha!", show_alert=True)

@@ -1,4 +1,4 @@
-Pyrogram==1.4.16
+Pyrogram
 TgCrypto
 aiohttp
 Pillow
